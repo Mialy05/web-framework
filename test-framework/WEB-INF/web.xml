@@ -7,14 +7,14 @@
     <display-name>Web Framework</display-name>
 
     <servlet>
-      <servlet-name>FrontServlet</servlet-name>
-      <servlet-class>etu1834.framework.servlet.FrontServlet</servlet-class>
+      <servlet-name>TestServlet</servlet-name>
+      <servlet-class>controller.TestServlet</servlet-class>
     </servlet>  
     
 
 <!-- SERVLET MAPPING -->
     <servlet-mapping>
-      <servlet-name>FrontServlet</servlet-name>
+      <servlet-name>TestServlet</servlet-name>
       <url-pattern>/*</url-pattern>
     </servlet-mapping>
     
