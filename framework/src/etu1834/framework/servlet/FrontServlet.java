@@ -28,7 +28,7 @@ public class FrontServlet extends HttpServlet {
     protected void processRequest(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
         PrintWriter out = res.getWriter();
         for (Map.Entry<String, Mapping> mapping : mappingUrls.entrySet()) {
-            out.println("url : " + mapping.getKey() + " => classe: " + mapping.getValue().getClassName() + " et  methode: " + mapping.getValue().getMethod());
+            out.println(">> url : " + mapping.getKey() + " => classe: " + mapping.getValue().getClassName() + " et  methode: " + mapping.getValue().getMethod());
         }
 
     }

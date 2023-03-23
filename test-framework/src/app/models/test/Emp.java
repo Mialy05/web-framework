@@ -1,6 +1,5 @@
 package app.models.test;
-
-// import etu1834.framework.decorator.Url;
+import etu1834.framework.decorator.*;
 
 public class Emp {
     int id;
@@ -9,7 +8,7 @@ public class Emp {
     public Emp() {
     }
 
-    // @Url(url = "emp-add")
+    @Url(url = "emp-hello")
     public void sayHello() {
         System.out.println("Hello");
     }
