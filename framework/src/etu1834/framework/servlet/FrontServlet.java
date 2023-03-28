@@ -12,6 +12,9 @@ import java.util.Vector;
 import etu1834.framework.Mapping;
 import etu1834.framework.decorator.Url;
 import etu1834.framework.utils.Util;
+import etu1834.framework.view.ModelView;
+import fkException.UrlException;
+import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -21,14 +24,33 @@ import jakarta.servlet.http.HttpServletResponse;
 /**
  * FrontServlet
  */
-@WebServlet(name="FrontServlet", urlPatterns = "/*")
 public class FrontServlet extends HttpServlet {
     HashMap<String, Mapping> mappingUrls;
 
     protected void processRequest(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
         PrintWriter out = res.getWriter();
-        for (Map.Entry<String, Mapping> mapping : mappingUrls.entrySet()) {
-            out.println(">> url : " + mapping.getKey() + " => classe: " + mapping.getValue().getClassName() + " et  methode: " + mapping.getValue().getMethod());
+        // for (Map.Entry<String, Mapping> mapping : mappingUrls.entrySet()) {
+        //     out.println(">> url : " + mapping.getKey() + " => classe: " + mapping.getValue().getClassName() + " et  methode: " + mapping.getValue().getMethod());
+        // }
+
+        String urlTarget = Util.getUrl(req);
+       
+        try {
+            Mapping target = Util.getTarget(urlTarget, mappingUrls);
+            // out.println(target.getMethod());
+            Class c = Class.forName(target.getClassName());
+            Method action = c.getDeclaredMethod(target.getMethod(), null);
+            Object instance = c.getConstructor().newInstance();
+            ModelView view = (ModelView)action.invoke(instance);
+            out.println(view.getView());
+            RequestDispatcher dispatcher = getServletContext().getRequestDispatcher("/views/" + view.getView());
+            dispatcher.forward(req, res);
+
+        } catch (UrlException e) {
+            out.print(e);
+            e.printStackTrace(out);
+        } catch (Exception e) {
+            e.printStackTrace(out);
         }
 
     }
