@@ -1,7 +1,13 @@
 package etu1834.framework.utils;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Vector;
+
+import etu1834.framework.Mapping;
+import fkException.UrlException;
+import jakarta.servlet.http.HttpServletRequest;
 
 
 public class Util {
@@ -23,5 +29,19 @@ public class Util {
         }
 
         return classes;
+    }
+
+    public static String getUrl(HttpServletRequest req) {
+        String url = req.getRequestURI();
+        // url = /context/url
+        return url.split("/")[2];  
+    }
+
+    public static Mapping getTarget(String url, HashMap<String, Mapping> dictionary) throws Exception {
+        Mapping target = dictionary.get(url);
+        if(target == null) {
+            throw new UrlException("URL introuvable");
+        }
+        return target;
     }
 }
