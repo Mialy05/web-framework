@@ -41,11 +41,20 @@ public class FrontServlet extends HttpServlet {
             Class c = Class.forName(target.getClassName());
             Method action = c.getDeclaredMethod(target.getMethod(), null);
             Object instance = c.getConstructor().newInstance();
-            ModelView view = (ModelView)action.invoke(instance);
-            out.println(view.getView());
-            RequestDispatcher dispatcher = getServletContext().getRequestDispatcher("/views/" + view.getView());
-            dispatcher.forward(req, res);
-
+            Object actionResponse = action.invoke(instance);
+            if(actionResponse.getClass().isInstance(ModelView.class)) {
+                ModelView view = (ModelView)actionResponse;
+                out.println(view.getView());
+    
+                HashMap<String, Object> data = view.getData();
+                for (Map.Entry<String, Object> d : data.entrySet()) {
+                    req.setAttribute(d.getKey(), d.getValue());
+                }
+    
+                RequestDispatcher dispatcher = getServletContext().getRequestDispatcher("/views/" + view.getView());
+                dispatcher.forward(req, res);
+            }
+            out.println("Le type de retour de la fonction " + target.getMethod() + " n'est pas une instance de view/ModelView ");
         } catch (UrlException e) {
             out.print(e);
             e.printStackTrace(out);
