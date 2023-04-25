@@ -1,6 +1,11 @@
 package etu1834.framework.utils;
 
 import java.io.File;
+import java.sql.Date;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
@@ -34,7 +39,9 @@ public class Util {
     public static String getUrl(HttpServletRequest req) {
         String url = req.getRequestURI();
         // url = /context/url
-        return url.split("/")[2];  
+        // return url.split("/")[2];
+        url = url.substring(1);  
+        return (String)url.subSequence(url.indexOf("/") + 1, url.length());
     }
 
     public static Mapping getTarget(String url, HashMap<String, Mapping> dictionary) throws Exception {
@@ -43,5 +50,29 @@ public class Util {
             throw new UrlException("URL introuvable");
         }
         return target;
+    }
+
+    public static Object castString(String data, Class type) throws ParseException {
+        if(type == int.class || type == Integer.class)
+            return Integer.parseInt(data);
+        if(type == float.class || type == Float.class )
+            return Float.parseFloat(data);
+        if(type == double.class || type == Double.class)
+            return Double.parseDouble(data);
+        if(type == boolean.class || type == Boolean.class )
+            return Boolean.parseBoolean(data);
+        if(type == Date.class ) 
+            return Date.valueOf(data);
+        if(type == java.util.Date.class ) {
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+            return formatter.parse(data);
+        }
+        if(type == Timestamp.class )
+            return Timestamp.valueOf(data);
+        if(type == String.class )
+            return data;
+        if(type == Time.class)
+            return Time.valueOf(data);
+        throw new ParseException(" Cannot parse " + data + " to " + type.getName(), 0);
     }
 }

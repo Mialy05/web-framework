@@ -3,8 +3,10 @@ package etu1834.framework.servlet;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
@@ -29,31 +31,52 @@ public class FrontServlet extends HttpServlet {
 
     protected void processRequest(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
         PrintWriter out = res.getWriter();
-        // for (Map.Entry<String, Mapping> mapping : mappingUrls.entrySet()) {
-        //     out.println(">> url : " + mapping.getKey() + " => classe: " + mapping.getValue().getClassName() + " et  methode: " + mapping.getValue().getMethod());
-        // }
 
         String urlTarget = Util.getUrl(req);
        
         try {
             Mapping target = Util.getTarget(urlTarget, mappingUrls);
-            // out.println(target.getMethod());
             Class c = Class.forName(target.getClassName());
             Method action = c.getDeclaredMethod(target.getMethod(), null);
             Object instance = c.getConstructor().newInstance();
             
-            ModelView view = (ModelView)action.invoke(instance);
-            out.println(view.getView());
+            Field[] fields = c.getDeclaredFields();
+            String setterName, fieldName, parameterValue, initial;
+            Method setter;
+            Class typeField;
+            Object parameter;
+            for (Field field : fields) {
+                fieldName = field.getName();
+                initial = String.valueOf(fieldName.charAt(0));
+                parameterValue = req.getParameter(fieldName); 
+                if( parameterValue != null) {
+                    setterName = "set" + field.getName().replaceFirst(initial, initial.toUpperCase());
+                    typeField = field.getType();
 
-            HashMap<String, Object> data = view.getData();
-            for (Map.Entry<String, Object> d : data.entrySet()) {
-                req.setAttribute(d.getKey(), d.getValue());
+                    setter = c.getDeclaredMethod(setterName, typeField);
+                    parameter = Util.castString(parameterValue, typeField);
+                    setter.invoke(instance, parameter);
+                }
             }
 
-            RequestDispatcher dispatcher = getServletContext().getRequestDispatcher("/views/" + view.getView());
-            dispatcher.forward(req, res);
-            out.println("Le type de retour de la fonction " + target.getMethod() + " n'est pas une instance de view/ModelView ");
+            Object actionReturn =  action.invoke(instance);
+            if(action.getReturnType().equals(ModelView.class)) {
+                ModelView view = (ModelView)actionReturn;
+                out.println(view.getView());
+    
+                HashMap<String, Object> data = view.getData();
+                for (Map.Entry<String, Object> d : data.entrySet()) {
+                    req.setAttribute(d.getKey(), d.getValue());
+                }
+    
+                RequestDispatcher dispatcher = getServletContext().getRequestDispatcher("/views/" + view.getView() + ".jsp");
+                dispatcher.forward(req, res);
+            }
+            
         } catch (UrlException e) {
+            out.print(e);
+            e.printStackTrace(out);
+        } catch (ParseException e) {
             out.print(e);
             e.printStackTrace(out);
         } catch (Exception e) {

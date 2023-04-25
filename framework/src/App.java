@@ -14,6 +14,15 @@ public class App {
     static HashMap<String, Mapping> mappingUrls;
 
     public static void main(String[] args) throws Exception {
+        String num = "4";
+        Integer i = Integer.parseInt(num);
+        int n = 4;
+        // System.out.println(Integer.parseInt(num));
+        test(i);
+    }
+
+    public static void test(int n) {
+        System.out.println(double.class == Double.class);
 
     }
 
