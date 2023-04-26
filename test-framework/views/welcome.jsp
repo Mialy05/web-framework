@@ -8,7 +8,7 @@
     <title>Document</title>
 </head>
 <body>
-    <%@page import="app.models.test.Emp, java.util.Vector"%>
+    <%@page import="app.models.objet.Emp, java.util.Vector"%>
     <%
         Vector<Emp> employes = (Vector<Emp>)request.getAttribute("employes");
     %>
