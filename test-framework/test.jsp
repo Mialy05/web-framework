@@ -8,10 +8,10 @@
 </head>
 <body>
     <li>
-        <a href="test.fwk?id=1">1</a>
+        <a href="details.fwk?id=1">1</a>
     </li>
     <li>
-        <a href="test.fwk?id=2">2</a>
+        <a href="details.fwk?id=2">2</a>
     </li>
 </body>
 </html>

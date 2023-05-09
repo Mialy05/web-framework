@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.net.URL;
 import java.text.ParseException;
 import java.util.HashMap;
@@ -12,6 +13,7 @@ import java.util.Map;
 import java.util.Vector;
 
 import etu1834.framework.Mapping;
+import etu1834.framework.decorator.Param;
 import etu1834.framework.decorator.Url;
 import etu1834.framework.utils.Util;
 import etu1834.framework.view.ModelView;
@@ -37,7 +39,7 @@ public class FrontServlet extends HttpServlet {
         try {
             Mapping target = Util.getTarget(urlTarget, mappingUrls);
             Class c = Class.forName(target.getClassName());
-            Method action = c.getDeclaredMethod(target.getMethod(), null);
+            Method action = c.getDeclaredMethod(target.getMethod(), target.getParameters());
             Object instance = c.getConstructor().newInstance();
             
             Field[] fields = c.getDeclaredFields();
@@ -55,14 +57,33 @@ public class FrontServlet extends HttpServlet {
 
                     setter = c.getDeclaredMethod(setterName, typeField);
                     parameter = Util.castString(parameterValue, typeField);
-                    setter.invoke(instance, parameter);
+                    if(parameter != null) {
+                        setter.invoke(instance, parameter);
+                    }
                 }
             }
 
-            Object actionReturn =  action.invoke(instance);
+            Object actionReturn;
+            Parameter[] actionParams = action.getParameters();
+            String parameterName;
+            if(actionParams.length > 0) {
+                Object[] actionParamValue = new Object[actionParams.length];
+                for (int i = 0; i < actionParams.length; i++) {
+                    if(actionParams[i].isAnnotationPresent(Param.class)) {
+                        parameterName = actionParams[i].getAnnotation(Param.class).name();
+                        actionParamValue[i] = Util.castString(req.getParameter(parameterName), actionParams[i].getType());
+                    }
+                    else {
+                        actionParamValue[i] = null;
+                    }
+                }
+                actionReturn =  action.invoke(instance, actionParamValue);
+            }
+            else {
+                actionReturn =  action.invoke(instance);
+            }
             if(action.getReturnType().equals(ModelView.class)) {
                 ModelView view = (ModelView)actionReturn;
-                out.println(view.getView());
     
                 HashMap<String, Object> data = view.getData();
                 for (Map.Entry<String, Object> d : data.entrySet()) {
@@ -110,7 +131,7 @@ public class FrontServlet extends HttpServlet {
             this.mappingUrls = new HashMap<String, Mapping>();
 
             for (File p : packages) {
-                Vector<Class> classes = Util.getClasses(p, null);
+                Vector<Class<?>> classes = Util.getClasses(p, null);
 
                 Method[] methods = null;
     
@@ -119,7 +140,7 @@ public class FrontServlet extends HttpServlet {
         
                     for (Method method : methods) {
                         if(method.isAnnotationPresent(Url.class)) {
-                            this.mappingUrls.put(method.getAnnotation(Url.class).url(), new Mapping(c.getName(), method.getName()));
+                            this.mappingUrls.put(method.getAnnotation(Url.class).url(), new Mapping(c.getName(), method.getName(), method.getParameterTypes() ));
                         }
                     }
                 }

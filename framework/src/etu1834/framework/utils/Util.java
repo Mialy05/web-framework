@@ -7,7 +7,6 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Vector;
 
 import etu1834.framework.Mapping;
@@ -16,9 +15,9 @@ import jakarta.servlet.http.HttpServletRequest;
 
 
 public class Util {
-    public static Vector<Class> getClasses(File file, Vector<Class> classes) throws ClassNotFoundException {
+    public static Vector<Class<?>> getClasses(File file, Vector<Class<?>> classes) throws ClassNotFoundException {
         if(classes == null)
-            classes = new Vector<Class>();
+            classes = new Vector<Class<?>>();
         
         if(file.isDirectory() == false) {
             int debutPrefix = file.getPath().indexOf("classes\\") + "classes\\".length();
@@ -52,7 +51,9 @@ public class Util {
         return target;
     }
 
-    public static Object castString(String data, Class type) throws ParseException {
+    public static Object castString(String data, Class<?> type) throws ParseException {
+        if(data == null || data == "" )
+            return null;
         if(type == int.class || type == Integer.class)
             return Integer.parseInt(data);
         if(type == float.class || type == Float.class )

@@ -1,1 +1,0 @@
-Numéro <%= request.getAttribute("numero") %>
