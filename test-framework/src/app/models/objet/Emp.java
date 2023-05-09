@@ -1,7 +1,5 @@
 package app.models.objet;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+
 import java.util.Date;
 import java.util.Vector;
 
@@ -42,18 +40,21 @@ public class Emp {
     }
 
     @Url(url = "emp-save.fwk")
-    public ModelView save() {
+    public ModelView save(@Param(name = "numero") int numero) {
         ModelView view = new ModelView();
         view.setView("info");
         view.addItem("emp", this);
+        view.addItem("numero", numero);
         return view;
     }
 
-    @Url(url = "test.fwk")
-    public ModelView details() {
+    @Url(url = "details.fwk")
+    public ModelView details(@Param(name = "id") int id, String name) {
+        // int id = 1;
         ModelView view = new ModelView();
-        view.setView("test");
-        view.addItem("numero", this.getId());
+        view.setView("details");
+        view.addItem("numero", id);
+        view.addItem("name", "Tsisy");
         return view;
     }
 

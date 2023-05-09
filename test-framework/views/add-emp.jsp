@@ -13,6 +13,7 @@
         <label for="naissance">Date de naissance</label>
         <input type="date" name="naissance">
         <input type="number" name="enfant" placeholder="Nb enfant">
+        <input type="number" name="numero"placeholder="numero" >
         <input type="submit" value="Valider">
     </form>
 </body>

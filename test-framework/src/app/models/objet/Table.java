@@ -8,7 +8,7 @@ public class Table {
     @Url(url = "table-show.fwk")
     public ModelView show() {
         ModelView view = new ModelView();
-        view.setView("table.jsp");
+        view.setView("table");
         return view;
     }
 }

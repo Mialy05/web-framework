@@ -1,18 +1,165 @@
 # web-framework
-For a college project
+
+-Pour l'instant, à tester sur Windows. (Cause: le mapping d'url vers classe de mapping n'est pas encore au point pour les autres plateformes car les chemins d'accès sont un peu différents pour chaque plateforme )
 
 # Framework
-Copiez le fichier framework.jar (dans le dossier framework de la branche master) dans le dossier WEB-INF/lib de votre application web
+
+-Copiez le fichier framework.jar (dans le dossier framework de la branche master) dans le dossier WEB-INF/lib de votre application web.
+-Mettez aussi un servlet-api.jar dans le dossier de librairie de votre application
+
+# Web.xml
+
+Déclarer le servlet FrontServlet dans le fichier WEB-INF/web.xml tel que:
+
+- servlet-name: FrontServlet
+- servlet-class: etu1834.framework.servlet.FrontServlet
+- url-pattern: \*.fwk
+
+Par conséquent, les urls qui veulent atteindre FrontServlet doivent se terminer par l'extension .fwk
+
+```xml
+<servlet>
+      <servlet-name>FrontServlet</servlet-name>
+      <servlet-class>etu1834.framework.servlet.FrontServlet</servlet-class>
+    </servlet>
+
+<!-- SERVLET MAPPING -->
+    <servlet-mapping>
+      <servlet-name>FrontServlet</servlet-name>
+      <url-pattern>*.fwk</url-pattern>
+    </servlet-mapping>
+</servlet>
+```
 
 # Routes
+
 Les urls qui veulent atteindre FrontServlet doivent se terminer par .fwk
 
-# Vues
-Pour rediriger l'application vers une vue, la méthode dans le modèle doit retourner un ModelView qui prend en paramètre:
-- le nom de la page (que vous devez impérativement mettre dans le répertoire view de votre application)
-- les données à envoyer. Passez le au ModelView avec la méthode addItem(String key, Object value) où key est le nom de la variable et value sa valeur
+# Modèle
 
-# Setter
-Si vous voulez passez des variables de classe de la View vers le model:
-- Le nom de la variable à passer au controller doit être exactement le même que celui de l'attribut de la classe concerné
-- Si l'attribut est de type java.util.Date veillez à ce que le format de la valeur envoyée soit yyyy-MM-dd (annee-mois-jour) pour permettre le casting
+- Vos classes doivent avoir des getter et setter : - getNomAttribut() - setNomAttribut(params)
+  où NomAttribut correspond au nom de l'attribut de classe concerné (la première lettre en majuscule)
+  Pour permettre le mapping entre un url et une méthode:
+- Annotez la méthode avec l'annotation @Url(url="URL_APPELANT_LA_METHODE")
+  exemple:
+
+```java
+    @Url(url = "liste.fwk")
+    public void getListe() {
+        // code
+    }
+```
+
+# Arborescence de votre application
+<ul>
+    <li>
+        views
+        <ul>
+            <li> Les pages .jsp </li>
+        </ul>
+    </li>
+    <li>
+        WEB-INF
+        <ul>
+            <li> classes </li>
+            <li> 
+                lib 
+                <ul>
+                    <li> framework.jar </li>
+                    <li> servlet-api.jar </li>
+                </ul>
+            </li>
+            <li> web.xml </li>
+        </ul>
+    </li>
+</ul>
+
+# Vues
+
+Mettez vos pages jsp dans un dossier <strong>"views"</strong>  dans votre application, au même niveau que WEB-INF.
+Pour rediriger l'application vers une vue, la méthode dans le modèle doit retourner un ModelView. Un ModelView possède deux attributs:
+
+- le nom de la page sans l'extension .jsp ( que vous devez impérativement mettre dans le répertoire views de votre application) à ajouter avec le setter ModelView.setView("#nom de la page sans .jsp")
+- les données à envoyer. Passez le au ModelView avec la méthode addItem(String key, Object value) où key est le nom de la variable et value sa valeur
+```java
+    @Url(url = "liste.fwk")
+    public Modelview getListe() {
+        ModelView view = new ModelView();
+        view.setView("liste");
+        view.addItem("numero", 7);
+        return view;
+    }
+```
+- pour récupérer une variable, utilisez request.getAttribute("key") où key correspond au nom de la variable que vous avez envoyé depuis la méthode d'action
+- veillez à caster la variable passer dans votre Vue.
+
+Dans la page views/liste.jsp
+```jsp
+    Numéro <%= request.getAttribute("numero") %>
+```
+
+# Passage de variable de la vue à la méthode d'action
+
+Le framework offre deux moyens de passer des variables de la vue vers le modèle:
+
+- Attribuer les paramètres de la vue aux variables de classe du modèle:
+    - Le nom de la variable à passer doit être exactement le même que celui de l'attribut de la classe concerné, le framework s'occupera de caster les variables
+    - ATTENTION : Si la variable envoyée est null ou est un string vide, le framework renverra une variable null à la méthode d'action
+    - Si l'attribut est de type java.util.Date veillez à ce que le format de la valeur envoyée soit yyyy-MM-dd (annee-mois-jour) pour permettre le cast
+
+    exemple:
+    ```jsp
+        <form action="emp-save.fwk" method="post">
+            <input type="text" name="nom" placeholder="nom">
+            <input type="text" name="adresse" placeholder="adresse">
+            <label for="naissance">Date de naissance</label>
+            <input type="date" name="naissance">
+            <input type="submit" value="Valider">
+        </form> 
+    ```
+    Nous avons la classe Emp comme classe de Mapping (avec ces setters et ces getters).
+    <br>
+    Nous allons envoyer les données de ce formulaire à la methode save de la classe Emp qui a déjà été décorée avec l'annotation Url.
+    ```java
+        public class Emp {
+            int id;
+            String nom;
+            String adresse;
+            Date naissance;
+            int enfant;
+
+            // getter
+            //setter
+    
+            public ModelView save() {
+                ModelView view = new ModelView();
+                view.setView("info");
+                view.addItem("nom", this.getNom());
+                view.addItem("adresse", this.getAdresse());
+                view.addItem("naissance", this.getNaissance());
+                return view;
+            }   
+        }
+    ```
+
+- Utiliser les variables envoyés comme argument de méthode dans la classe de Mapping:
+    - Annotez l'argument de la méthode concerné par la liaison de variable avec le décorateur @Param(name="NOM_DE_LA_VARIABLE_DANS_VIEW")
+    - Utilisez-le librement dans votre méthode
+
+    exemple 
+    ```jsp
+        <a href="details.fwk?id=1">1</a>
+    ```
+    Nous avons besoin de ce paramètre "id" dans notre méthode details dans la classe de Mappint
+    ```java
+        @Url(url = "details.fwk")
+        public ModelView details(@Param(name = "id") int id, String name) {
+            // comme le paramètre id est annoté, il est lié au variable venant de la vue
+            // ce qui n'est pas le cas pour le paramètre name
+            ModelView view = new ModelView();
+            view.setView("details");
+            view.addItem("numero", id);
+            view.addItem("name", name);
+            return view;
+        }
+    ```
