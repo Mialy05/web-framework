@@ -7,13 +7,13 @@
     <title>Ajout employé</title>
 </head>
 <body>
-    <form action="/test-framework/emp-save.fwk" method="post">
+    <form action="/test-framework/emp-new.fwk" method="post" enctype="multipart/form-data" >
         <input type="text" name="nom" placeholder="nom">
         <input type="text" name="adresse" placeholder="adresse">
         <label for="naissance">Date de naissance</label>
         <input type="date" name="naissance">
         <input type="number" name="enfant" placeholder="Nb enfant">
-        <input type="number" name="numero"placeholder="numero" >
+        <input type="file" name="photo">
         <input type="submit" value="Valider">
     </form>
 </body>
