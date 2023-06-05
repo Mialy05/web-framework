@@ -10,12 +10,13 @@
     <%@page import="app.models.objet.Emp"%>
     <% Emp e = (Emp)request.getAttribute("emp"); %>
 
-    Numero: <%= request.getAttribute("numero") %>
+    <%-- Numero: <%= request.getAttribute("numero") %> --%>
     <br>
     Nom: <%= e.getNom() %>
     Adresse: <%= e.getAdresse() %>
     Naissance: <%= e.getNaissance() %>
     Nombre enfants: <%= e.getEnfant() %>
+    Photo: <%= e.getPhoto().getName() %>
 
 </body>
 </html>

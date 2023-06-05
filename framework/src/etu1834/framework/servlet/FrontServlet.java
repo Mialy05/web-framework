@@ -15,19 +15,26 @@ import java.util.Vector;
 import etu1834.framework.Mapping;
 import etu1834.framework.decorator.Param;
 import etu1834.framework.decorator.Url;
+import etu1834.framework.utils.FileUpload;
 import etu1834.framework.utils.Util;
 import etu1834.framework.view.ModelView;
 import fkException.UrlException;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.Part;
 
 /**
  * FrontServlet
  */
+@MultipartConfig(
+  fileSizeThreshold = 1024 * 1024 * 1, // 1 MB
+  maxFileSize = 1024 * 1024 * 10,      // 10 MB
+  maxRequestSize = 1024 * 1024 * 100   // 100 MB
+)
 public class FrontServlet extends HttpServlet {
     HashMap<String, Mapping> mappingUrls;
 
@@ -35,7 +42,6 @@ public class FrontServlet extends HttpServlet {
         PrintWriter out = res.getWriter();
 
         String urlTarget = Util.getUrl(req);
-       
         try {
             Mapping target = Util.getTarget(urlTarget, mappingUrls);
             Class c = Class.forName(target.getClassName());
@@ -46,32 +52,58 @@ public class FrontServlet extends HttpServlet {
             String setterName, fieldName, parameterValue, initial;
             Method setter;
             Class typeField;
-            Object parameter;
+            Object parameter = null;
+
+        //set les attributs de l'instance
             for (Field field : fields) {
                 fieldName = field.getName();
                 initial = String.valueOf(fieldName.charAt(0));
                 parameterValue = req.getParameter(fieldName); 
-                if( parameterValue != null) {
-                    setterName = "set" + field.getName().replaceFirst(initial, initial.toUpperCase());
-                    typeField = field.getType();
+                typeField = field.getType();
+                setterName = "set" + field.getName().replaceFirst(initial, initial.toUpperCase());
+                setter = c.getDeclaredMethod(setterName, typeField);
 
-                    setter = c.getDeclaredMethod(setterName, typeField);
+                if(typeField.equals(FileUpload.class)) {
+                    Part toUpload = req.getPart(fieldName);
+                    if(toUpload != null) {
+                        FileUpload tmp = new FileUpload();
+                        tmp.setName(toUpload.getSubmittedFileName());
+                        tmp.setFile(toUpload.getInputStream().readAllBytes());
+                        parameter = tmp;
+                    } 
+                }
+                else {
+                    parameterValue = req.getParameter(fieldName); 
+                    out.print(fieldName + " " + parameterValue + " zay ");
                     parameter = Util.castString(parameterValue, typeField);
-                    if(parameter != null) {
-                        setter.invoke(instance, parameter);
-                    }
+                }
+                if(parameter != null) {
+                    setter.invoke(instance, parameter);
                 }
             }
 
             Object actionReturn;
             Parameter[] actionParams = action.getParameters();
             String parameterName;
+        //fonction avec arguments
             if(actionParams.length > 0) {
                 Object[] actionParamValue = new Object[actionParams.length];
                 for (int i = 0; i < actionParams.length; i++) {
                     if(actionParams[i].isAnnotationPresent(Param.class)) {
                         parameterName = actionParams[i].getAnnotation(Param.class).name();
-                        actionParamValue[i] = Util.castString(req.getParameter(parameterName), actionParams[i].getType());
+
+                        if(actionParams[i].getType().equals(FileUpload.class)) {
+                            Part toUpload = req.getPart(parameterName);
+                            if(toUpload != null) {
+                                FileUpload tmp = new FileUpload();
+                                tmp.setName(toUpload.getSubmittedFileName());
+                                tmp.setFile(toUpload.getInputStream().readAllBytes());
+                                actionParamValue[i] = tmp;
+                            }
+                        }
+                        else {
+                            actionParamValue[i] = Util.castString(req.getParameter(parameterName), actionParams[i].getType());
+                        }
                     }
                     else {
                         actionParamValue[i] = null;

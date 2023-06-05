@@ -52,7 +52,7 @@ public class Util {
     }
 
     public static Object castString(String data, Class<?> type) throws ParseException {
-        if(data == null || data == "" )
+        if(data == null || data.equals("") )
             return null;
         if(type == int.class || type == Integer.class)
             return Integer.parseInt(data);

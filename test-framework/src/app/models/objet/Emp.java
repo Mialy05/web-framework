@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.Vector;
 
 import etu1834.framework.decorator.*;
+import etu1834.framework.utils.FileUpload;
 import etu1834.framework.view.ModelView;
 
 public class Emp {
@@ -12,7 +13,16 @@ public class Emp {
     String adresse;
     Date naissance;
     int enfant;
+    FileUpload photo;
     
+    public FileUpload getPhoto() {
+        return photo;
+    }
+
+    public void setPhoto(FileUpload photo) {
+        this.photo = photo;
+    }
+
     public Emp() {
     }
 
@@ -39,6 +49,14 @@ public class Emp {
         return view;
     }
 
+    @Url(url = "emp-new.fwk")
+    public ModelView save() {
+        ModelView view = new ModelView();
+        view.setView("info");
+        view.addItem("emp", this);
+        return view;
+    }
+
     @Url(url = "emp-save.fwk")
     public ModelView save(@Param(name = "numero") int numero) {
         ModelView view = new ModelView();
@@ -55,6 +73,14 @@ public class Emp {
         view.setView("details");
         view.addItem("numero", id);
         view.addItem("name", "Tsisy");
+        return view;
+    }
+
+    @Url(url = "add-photo.fwk")
+    public ModelView newPhoto( @Param(name = "photo") FileUpload photo ) {
+        ModelView view = new ModelView();
+        view.setView("view-photo");
+        view.addItem("photo", photo);
         return view;
     }
 
