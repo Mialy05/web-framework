@@ -163,3 +163,17 @@ Le framework offre deux moyens de passer des variables de la vue vers le modèle
             return view;
         }
     ```
+
+# Singleton 
+Si vous voulez que votre classe soit un singleton, annotez la classe avec le décorateur Scope(package etu1834.framework.decorator.Scope, veillez à l'importer correctement ). Ce décorateur a un attribut <strong>value</strong> et sa valeur doit être "singleton". 
+
+```java
+    @Scope(value = "singleton")
+    public class Emp {
+        int id;
+        String nom;
+        String adresse;
+
+        // code ...
+    }
+```
