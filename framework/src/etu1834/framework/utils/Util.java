@@ -1,6 +1,7 @@
 package etu1834.framework.utils;
 
 import java.io.File;
+import java.lang.reflect.Field;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
@@ -75,5 +76,29 @@ public class Util {
         if(type == Time.class)
             return Time.valueOf(data);
         throw new ParseException(" Cannot parse " + data + " to " + type.getName(), 0);
+    }
+
+    public static void restoreInstance(Object obj) throws IllegalArgumentException, IllegalAccessException {
+        Field[] fields = obj.getClass().getDeclaredFields();
+        Class type;
+        for (Field field : fields) {
+            field.setAccessible(true);
+            type = field.getType(); 
+            if(type.isPrimitive()) {
+                // boolean, char, boolean, int, double, float, byte, short, long
+                if(type == boolean.class) {
+                    field.set(obj, false);
+                }
+                else if(type == char.class) {
+                    field.set(obj, "");
+                }
+                else {
+                    field.set(obj, 0);
+                }
+            }
+            else {
+                field.set(obj, null);
+            }
+        }
     }
 }

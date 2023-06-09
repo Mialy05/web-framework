@@ -16,12 +16,7 @@ public class App {
     static HashMap<String, Mapping> mappingUrls;
 
     public static void main(String[] args) throws Exception {
-        Mapping m = new Mapping();
-        Method setter = m.getClass().getDeclaredMethod("setMethod", String.class);
-        Parameter[] p = setter.getParameters();
-        for (Parameter parameter : p) {
-            System.out.println(parameter.isNamePresent());
-        }
+        
     }
 
     

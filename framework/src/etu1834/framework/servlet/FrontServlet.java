@@ -14,6 +14,7 @@ import java.util.Vector;
 
 import etu1834.framework.Mapping;
 import etu1834.framework.decorator.Param;
+import etu1834.framework.decorator.Scope;
 import etu1834.framework.decorator.Url;
 import etu1834.framework.utils.FileUpload;
 import etu1834.framework.utils.Util;
@@ -37,17 +38,43 @@ import jakarta.servlet.http.Part;
 )
 public class FrontServlet extends HttpServlet {
     HashMap<String, Mapping> mappingUrls;
+    HashMap<String, Object> singletons;
+    HashMap<String, Integer> nbrSingleton;
+
 
     protected void processRequest(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
         PrintWriter out = res.getWriter();
+
+        for (Map.Entry<String, Object> d : singletons.entrySet()) {
+            out.println(d.getKey() + " " + d.getValue());
+        }
 
         String urlTarget = Util.getUrl(req);
         try {
             Mapping target = Util.getTarget(urlTarget, mappingUrls);
             Class c = Class.forName(target.getClassName());
             Method action = c.getDeclaredMethod(target.getMethod(), target.getParameters());
-            Object instance = c.getConstructor().newInstance();
+            Object instance = null;
+
+        // traitement singleton
+            if(this.singletons.containsKey(c.getName())) {
+                if(this.singletons.get(c.getName()) == null) {
+                    out.print("nampiditra anaty singleetons");
+                    instance = c.getConstructor().newInstance();
+                    this.singletons.put(c.getName(), instance);
+                }
+                else {
+                    out.print("naka anaty singletons");
+                    instance = this.singletons.get(c.getName());
+                    // Util.restoreInstance(instance);
+                }
+            }
+            else {
+                instance = c.getConstructor().newInstance();
+            }
             
+            out.print(instance);
+
             Field[] fields = c.getDeclaredFields();
             String setterName, fieldName, parameterValue, initial;
             Method setter;
@@ -56,14 +83,18 @@ public class FrontServlet extends HttpServlet {
 
         //set les attributs de l'instance
             for (Field field : fields) {
+                field.setAccessible(true);
                 fieldName = field.getName();
+                // out.println(fieldName + " => " + field.get(instance));
                 initial = String.valueOf(fieldName.charAt(0));
                 parameterValue = req.getParameter(fieldName); 
                 typeField = field.getType();
                 setterName = "set" + field.getName().replaceFirst(initial, initial.toUpperCase());
                 setter = c.getDeclaredMethod(setterName, typeField);
 
-                if(typeField.equals(FileUpload.class)) {
+                // out.print(req.getContentType().startsWith("multipart/"));
+                String reqContent = req.getContentType();
+                if( reqContent != null && reqContent.startsWith("multipart/") && typeField.equals(FileUpload.class)) {
                     Part toUpload = req.getPart(fieldName);
                     if(toUpload != null) {
                         FileUpload tmp = new FileUpload();
@@ -74,7 +105,6 @@ public class FrontServlet extends HttpServlet {
                 }
                 else {
                     parameterValue = req.getParameter(fieldName); 
-                    out.print(fieldName + " " + parameterValue + " zay ");
                     parameter = Util.castString(parameterValue, typeField);
                 }
                 if(parameter != null) {
@@ -161,6 +191,7 @@ public class FrontServlet extends HttpServlet {
             
             File[] packages = classesDir.listFiles();
             this.mappingUrls = new HashMap<String, Mapping>();
+            this.singletons = new HashMap<String, Object>();
 
             for (File p : packages) {
                 Vector<Class<?>> classes = Util.getClasses(p, null);
@@ -168,8 +199,15 @@ public class FrontServlet extends HttpServlet {
                 Method[] methods = null;
     
                 for (Class c : classes) {
+                // vérifier si la classe est un singleton et l'ajouter à l'hashmap
+                    Scope scopeAnnotation = ((Scope)c.getAnnotation(Scope.class));    
+                    if(scopeAnnotation != null) {
+                        if(scopeAnnotation.value().compareToIgnoreCase("singleton") == 0) {
+                            this.singletons.put(c.getName(), null);
+                        }
+                    }
+                // ajouter class, methode et url de mapping    
                     methods = c.getDeclaredMethods();
-        
                     for (Method method : methods) {
                         if(method.isAnnotationPresent(Url.class)) {
                             this.mappingUrls.put(method.getAnnotation(Url.class).url(), new Mapping(c.getName(), method.getName(), method.getParameterTypes() ));
