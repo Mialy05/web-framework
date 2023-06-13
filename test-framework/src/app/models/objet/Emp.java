@@ -27,11 +27,35 @@ public class Emp {
         setNom(nom);
     }
 
+    @Url(url = "connection.fwk") 
+    public ModelView connection() {
+        ModelView view = new ModelView();
+        view.setView("hello");
+        view.addSession("profil", "");
+        return view;
+    }
+
+    @Url(url = "connection-admin.fwk") 
+    public ModelView connectionAdmin() {
+        ModelView view = new ModelView();
+        view.setView("hello");
+        view.addSession("profil", "admin");
+        return view;
+    }
+
     @Url(url = "emp-count.fwk")
     public ModelView count() {
         ModelView view = new ModelView();
         view.setView("count");
         view.addItem("count", this.count);
+        return view;
+    }
+
+    @Url(url = "admin.fwk")
+    @Auth(profil = "admin")
+    public ModelView admin() {
+        ModelView view = new ModelView();
+        view.setView("admin");
         return view;
     }
 
@@ -56,6 +80,7 @@ public class Emp {
     }
     
     @Url(url = "emp-form.fwk")
+    @Auth(profil = "")
     public ModelView setForm() {
         ModelView view = new ModelView();
         view.setView("add-emp");

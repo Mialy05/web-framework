@@ -9,6 +9,11 @@
     <servlet>
       <servlet-name>Controller</servlet-name>
       <servlet-class>etu1834.framework.servlet.FrontServlet</servlet-class>
+
+      <init-param>
+        <param-name>profil</param-name>
+        <param-value>profil</param-value>
+      </init-param>
     </servlet>  
     
 <!-- SERVLET MAPPING -->

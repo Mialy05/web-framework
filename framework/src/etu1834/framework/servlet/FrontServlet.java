@@ -13,12 +13,14 @@ import java.util.Map;
 import java.util.Vector;
 
 import etu1834.framework.Mapping;
+import etu1834.framework.decorator.Auth;
 import etu1834.framework.decorator.Param;
 import etu1834.framework.decorator.Scope;
 import etu1834.framework.decorator.Url;
 import etu1834.framework.utils.FileUpload;
 import etu1834.framework.utils.Util;
 import etu1834.framework.view.ModelView;
+import fkException.PermissionException;
 import fkException.UrlException;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
@@ -26,6 +28,7 @@ import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.Part;
 
 /**
@@ -40,10 +43,13 @@ public class FrontServlet extends HttpServlet {
     HashMap<String, Mapping> mappingUrls;
     HashMap<String, Object> singletons;
     HashMap<String, Integer> nbrSingleton;
+    boolean permission = false;
 
 
     protected void processRequest(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
         PrintWriter out = res.getWriter();
+        permission = false;
+        HttpSession session = req.getSession();
 
         for (Map.Entry<String, Object> d : singletons.entrySet()) {
             out.println(d.getKey() + " " + d.getValue());
@@ -54,17 +60,40 @@ public class FrontServlet extends HttpServlet {
             Mapping target = Util.getTarget(urlTarget, mappingUrls);
             Class c = Class.forName(target.getClassName());
             Method action = c.getDeclaredMethod(target.getMethod(), target.getParameters());
+            Auth authState = action.getAnnotation(Auth.class) ;
+
+            if(authState == null) {
+                permission = true;
+            }
+            else {
+                String profil = authState.profil();   
+            
+                if(session.getAttribute(getInitParameter("sessionName")) != null) {
+                    if(profil.equals("")) {
+                        permission = true;
+                    }
+                    else if(session.getAttribute(getInitParameter("sessionName")).equals(profil)){
+                        // if(session.getAttribute(getInitParameter("profil")).equals(profil))
+                        permission = true;
+                    }
+                }
+
+            }
+        
+        // Gestion session et permission
+            if(!permission) {
+                throw new PermissionException(target.getMethod());
+            }    
+
             Object instance = null;
 
         // traitement singleton
             if(this.singletons.containsKey(c.getName())) {
                 if(this.singletons.get(c.getName()) == null) {
-                    out.print("nampiditra anaty singleetons");
                     instance = c.getConstructor().newInstance();
                     this.singletons.put(c.getName(), instance);
                 }
                 else {
-                    out.print("naka anaty singletons");
                     instance = this.singletons.get(c.getName());
                     // Util.restoreInstance(instance);
                 }
@@ -73,8 +102,6 @@ public class FrontServlet extends HttpServlet {
                 instance = c.getConstructor().newInstance();
             }
             
-            out.print(instance);
-
             Field[] fields = c.getDeclaredFields();
             String setterName, fieldName, parameterValue, initial;
             Method setter;
@@ -151,7 +178,15 @@ public class FrontServlet extends HttpServlet {
                 for (Map.Entry<String, Object> d : data.entrySet()) {
                     req.setAttribute(d.getKey(), d.getValue());
                 }
-    
+
+                HashMap<String, Object> newSession = view.getSession();
+                if(newSession != null) {
+                    for (Map.Entry<String, Object> s : newSession.entrySet()) {
+                        out.print(s.getKey() + " " + s.getValue());
+                        session.setAttribute(s.getKey() , s.getValue());
+                    }
+                }
+
                 RequestDispatcher dispatcher = getServletContext().getRequestDispatcher("/views/" + view.getView() + ".jsp");
                 dispatcher.forward(req, res);
             }
