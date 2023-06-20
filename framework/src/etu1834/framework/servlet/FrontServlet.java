@@ -62,6 +62,7 @@ public class FrontServlet extends HttpServlet {
             Method action = c.getDeclaredMethod(target.getMethod(), target.getParameters());
             Auth authState = action.getAnnotation(Auth.class) ;
 
+        // Gestion session et permission
             if(authState == null) {
                 permission = true;
             }
@@ -80,7 +81,6 @@ public class FrontServlet extends HttpServlet {
 
             }
         
-        // Gestion session et permission
             if(!permission) {
                 throw new PermissionException(target.getMethod());
             }    
