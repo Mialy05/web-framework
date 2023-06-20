@@ -220,5 +220,12 @@ et dans notre web.xml
 Ainsi nous avons défini une variable de session "profil" qui contient la valeur "user"
 
 # Méthode protégé.
-Vous voulez peut être que certaines de vos méthode ne soit accessible que par quelques utilisateurs précis.
-Pour cela utilisez l'Annotation @Auth();
+
+# Session
+Si vous voulez ajouter, modifier ou manipulez des variables de session dans votre méthode, suivez les étapes suivantes:
+ - Ajouter un attribut nommé <strong>session</strong> de type HashMap<String, Object> dans votre classe
+ - Décorer la méthode qui veut utiliser des variables de session avec <strong>@Session</strong>
+ - Les variables de sessions seront tout de suite présentes dans l'attribut <strong>session</strong> de votre classe
+ - De même, les modifications que vous apporterez dans l'attribut session de votre classe sera pris en compte dans la session de l'application.
+
+

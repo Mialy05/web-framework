@@ -1,0 +1,1 @@
+Article dans la session <%= request.getAttribute("article") %>

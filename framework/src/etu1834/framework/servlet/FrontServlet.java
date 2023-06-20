@@ -8,6 +8,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.net.URL;
 import java.text.ParseException;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
@@ -16,6 +17,7 @@ import etu1834.framework.Mapping;
 import etu1834.framework.decorator.Auth;
 import etu1834.framework.decorator.Param;
 import etu1834.framework.decorator.Scope;
+import etu1834.framework.decorator.Session;
 import etu1834.framework.decorator.Url;
 import etu1834.framework.utils.FileUpload;
 import etu1834.framework.utils.Util;
@@ -102,13 +104,12 @@ public class FrontServlet extends HttpServlet {
                 instance = c.getConstructor().newInstance();
             }
             
+        //set les attributs de l'instance
             Field[] fields = c.getDeclaredFields();
             String setterName, fieldName, parameterValue, initial;
             Method setter;
             Class typeField;
             Object parameter = null;
-
-        //set les attributs de l'instance
             for (Field field : fields) {
                 field.setAccessible(true);
                 fieldName = field.getName();
@@ -139,16 +140,39 @@ public class FrontServlet extends HttpServlet {
                 }
             }
 
+        // envoyer les sessions vers la classe si elle est annotée @session
+            Field sessionField = instance.getClass().getDeclaredField("session");
+            if(action.isAnnotationPresent(Session.class) ) {
+                if(sessionField == null) {
+                    throw new Exception( target.getMethod() + "require session. Your class must have field HashMap<String, Object>session .");
+                }
+                sessionField.setAccessible(true);
+                HashMap<String, Object> classSession = ((HashMap<String, Object>)sessionField.get(instance));
+                if(classSession == null) {
+                    classSession = new HashMap<String, Object>();
+                }
+
+                Enumeration<String> sessionAttributes = session.getAttributeNames();
+                String key;
+                while (sessionAttributes.hasMoreElements()) {
+                    key = (String)sessionAttributes.nextElement();
+                    out.println(key + ": " + session.getAttribute(key) + "<br>");
+                    classSession.put(key, session.getAttribute(key));
+                }
+
+            }
+
             Object actionReturn;
             Parameter[] actionParams = action.getParameters();
             String parameterName;
         //fonction avec arguments
+        // out.println("param " + req.getParameter("name"));
             if(actionParams.length > 0) {
                 Object[] actionParamValue = new Object[actionParams.length];
                 for (int i = 0; i < actionParams.length; i++) {
                     if(actionParams[i].isAnnotationPresent(Param.class)) {
                         parameterName = actionParams[i].getAnnotation(Param.class).name();
-
+                        out.println("paramName " + parameterName);
                         if(actionParams[i].getType().equals(FileUpload.class)) {
                             Part toUpload = req.getPart(parameterName);
                             if(toUpload != null) {
@@ -160,6 +184,7 @@ public class FrontServlet extends HttpServlet {
                         }
                         else {
                             actionParamValue[i] = Util.castString(req.getParameter(parameterName), actionParams[i].getType());
+                            out.println("value " + actionParamValue[i]);
                         }
                     }
                     else {
@@ -171,6 +196,17 @@ public class FrontServlet extends HttpServlet {
             else {
                 actionReturn =  action.invoke(instance);
             }
+
+        // récupérer les sessions modifié dans la méthode annoté @Session pour mettre à jout httpSession  
+            if(action.isAnnotationPresent(Session.class)) {
+                HashMap<String, Object> classSession = ((HashMap<String, Object>)sessionField.get(instance));
+                
+                for (Map.Entry<String, Object> s : classSession.entrySet()) {
+                    out.print(s.getKey() + " " + s.getValue());
+                    session.setAttribute(s.getKey() , s.getValue());
+                }
+            }
+
             if(action.getReturnType().equals(ModelView.class)) {
                 ModelView view = (ModelView)actionReturn;
     
