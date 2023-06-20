@@ -177,3 +177,48 @@ Si vous voulez que votre classe soit un singleton, annotez la classe avec le dé
         // code ...
     }
 ```
+# Session 
+Pour utiliser HttpSession, vous devez ajoutez quelques lignes à votre web.xml à l'intérieur de la balise servlet contenant FrontServlet
+```xml
+    <servlet>
+      <servlet-name>Controller</servlet-name>
+      <servlet-class>etu1834.framework.servlet.FrontServlet</servlet-class>
+
+      <init-param>
+        <param-name>sessionName</param-name>
+        <param-value>{{ nom de votre variable de session }}</param-value>
+      </init-param>
+    </servlet>  
+```
+Ici, nous avons défini notre variable de session. C'est cette valeur que vous utiliserez comme attribut de votre session. Veillez à bien copiez la balise <strong>pram-name</strong>, et remplacez le contenu de <strong>param-value</strong> par le nom de variable que vous voudriez utiliser.
+
+Si votre fonction veut ajouter des variables de session, elle doit retourner un ModelView. Veillez à ajouter vos variables de session et leurs valeurs dans l'attribut <strong>session</strong> de l'objet ModelView à retourner avec la méthode addSession(String nomVariable, Object value).
+<strong>IMPORTANT</strong>
+Le nom de variable de session doit correspondre à celui que vous avez défini dans web.xml
+Nous avons par exemple une méthode de connexion
+```java
+    @Url(url = "connection.fwk")
+    public ModelView connection() {
+        ModelView view = new ModelView();
+        view.setView("hello");
+        view.addSession("profil", "user");
+        return view;
+    }
+```
+et dans notre web.xml 
+```xml
+    <servlet>
+      <servlet-name>Controller</servlet-name>
+      <servlet-class>etu1834.framework.servlet.FrontServlet</servlet-class>
+
+      <init-param>
+        <param-name>sessionName</param-name>
+        <param-value>profil</param-value>
+      </init-param>
+    </servlet>  
+```
+Ainsi nous avons défini une variable de session "profil" qui contient la valeur "user"
+
+# Méthode protégé.
+Vous voulez peut être que certaines de vos méthode ne soit accessible que par quelques utilisateurs précis.
+Pour cela utilisez l'Annotation @Auth();
