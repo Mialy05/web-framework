@@ -204,6 +204,13 @@ public class FrontServlet extends HttpServlet {
                 }
             }
 
+        // model qui retourne JSON
+            if(action.isAnnotationPresent(Json.class)) {
+                String json = new Gson().toJson(actionReturn);
+                res.setContentType("application/json");
+                out.print(json);
+            }
+
             if(action.getReturnType().equals(ModelView.class)) {
                 ModelView view = (ModelView)actionReturn;
                 
