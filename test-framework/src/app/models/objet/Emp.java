@@ -71,6 +71,7 @@ public class Emp {
     @Url(url = "emp-hello.fwk")
     public ModelView getListe() {
         ModelView view = new ModelView();
+        view.setJson(true);
         view.setView("welcome");
         Vector<Emp> emps = new Vector<Emp>(2);
         emps.add(new Emp(1, "Nante"));

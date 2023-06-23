@@ -13,8 +13,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
 
+import com.google.gson.Gson;
+
 import etu1834.framework.Mapping;
 import etu1834.framework.decorator.Auth;
+import etu1834.framework.decorator.Json;
 import etu1834.framework.decorator.Param;
 import etu1834.framework.decorator.Scope;
 import etu1834.framework.decorator.Session;
@@ -52,10 +55,6 @@ public class FrontServlet extends HttpServlet {
         PrintWriter out = res.getWriter();
         permission = false;
         HttpSession session = req.getSession();
-
-        for (Map.Entry<String, Object> d : singletons.entrySet()) {
-            out.println(d.getKey() + " " + d.getValue());
-        }
 
         String urlTarget = Util.getUrl(req);
         try {
@@ -141,8 +140,8 @@ public class FrontServlet extends HttpServlet {
             }
 
         // envoyer les sessions vers la classe si elle est annotée @session
-            Field sessionField = instance.getClass().getDeclaredField("session");
             if(action.isAnnotationPresent(Session.class) ) {
+                Field sessionField = instance.getClass().getDeclaredField("session");
                 if(sessionField == null) {
                     throw new Exception( target.getMethod() + "require session. Your class must have field HashMap<String, Object>session .");
                 }
@@ -156,7 +155,7 @@ public class FrontServlet extends HttpServlet {
                 String key;
                 while (sessionAttributes.hasMoreElements()) {
                     key = (String)sessionAttributes.nextElement();
-                    out.println(key + ": " + session.getAttribute(key) + "<br>");
+                    // out.println(key + ": " + session.getAttribute(key) + "<br>");
                     classSession.put(key, session.getAttribute(key));
                 }
 
@@ -172,7 +171,6 @@ public class FrontServlet extends HttpServlet {
                 for (int i = 0; i < actionParams.length; i++) {
                     if(actionParams[i].isAnnotationPresent(Param.class)) {
                         parameterName = actionParams[i].getAnnotation(Param.class).name();
-                        out.println("paramName " + parameterName);
                         if(actionParams[i].getType().equals(FileUpload.class)) {
                             Part toUpload = req.getPart(parameterName);
                             if(toUpload != null) {
@@ -184,7 +182,6 @@ public class FrontServlet extends HttpServlet {
                         }
                         else {
                             actionParamValue[i] = Util.castString(req.getParameter(parameterName), actionParams[i].getType());
-                            out.println("value " + actionParamValue[i]);
                         }
                     }
                     else {
@@ -199,17 +196,17 @@ public class FrontServlet extends HttpServlet {
 
         // récupérer les sessions modifié dans la méthode annoté @Session pour mettre à jout httpSession  
             if(action.isAnnotationPresent(Session.class)) {
+                Field sessionField = instance.getClass().getDeclaredField("session");
                 HashMap<String, Object> classSession = ((HashMap<String, Object>)sessionField.get(instance));
                 
                 for (Map.Entry<String, Object> s : classSession.entrySet()) {
-                    out.print(s.getKey() + " " + s.getValue());
                     session.setAttribute(s.getKey() , s.getValue());
                 }
             }
 
             if(action.getReturnType().equals(ModelView.class)) {
                 ModelView view = (ModelView)actionReturn;
-    
+                
                 HashMap<String, Object> data = view.getData();
                 for (Map.Entry<String, Object> d : data.entrySet()) {
                     req.setAttribute(d.getKey(), d.getValue());
@@ -218,15 +215,20 @@ public class FrontServlet extends HttpServlet {
                 HashMap<String, Object> newSession = view.getSession();
                 if(newSession != null) {
                     for (Map.Entry<String, Object> s : newSession.entrySet()) {
-                        out.print(s.getKey() + " " + s.getValue());
                         session.setAttribute(s.getKey() , s.getValue());
                     }
                 }
 
-                RequestDispatcher dispatcher = getServletContext().getRequestDispatcher("/views/" + view.getView() + ".jsp");
-                dispatcher.forward(req, res);
+                if(view.getJson() == false) {
+                    RequestDispatcher dispatcher = getServletContext().getRequestDispatcher("/views/" + view.getView() + ".jsp");
+                    dispatcher.forward(req, res);
+                }
+                else {
+                    String json = new Gson().toJson(data);
+                    res.setContentType("application/json");
+                    out.print(json);
+                }
             }
-            
         } catch (UrlException e) {
             out.print(e);
             e.printStackTrace(out);
