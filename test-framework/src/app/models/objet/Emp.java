@@ -79,6 +79,15 @@ public class Emp {
         view.addItem("employes", emps);
         return view;
     }
+
+    @Url(url = "emp-list.fwk")
+    @Json
+    public Vector<Emp> getAll() {
+        Vector<Emp> emps = new Vector<Emp>(2);
+        emps.add(new Emp(1, "Nante"));
+        emps.add(new Emp(2, "Mialisoa"));
+        return emps;
+    }
     
     @Url(url = "emp-form.fwk")
     @Auth(profil = "")
