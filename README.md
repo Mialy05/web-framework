@@ -177,7 +177,7 @@ Si vous voulez que votre classe soit un singleton, annotez la classe avec le dé
         // code ...
     }
 ```
-# Session 
+# Protection de méthode avec Session 
 Pour utiliser HttpSession, vous devez ajoutez quelques lignes à votre web.xml à l'intérieur de la balise servlet contenant FrontServlet
 ```xml
     <servlet>
@@ -218,14 +218,21 @@ et dans notre web.xml
     </servlet>  
 ```
 Ainsi nous avons défini une variable de session "profil" qui contient la valeur "user"
+Cette dernière sera alors utilisée pour protéger vos méthodes.
+Utilisez l'annotation @Auth(profil = "") sur les méthodes que vous voulez protéger.
+La variable profil de l'annotation correspond au profil autorisé à accéder à ce méthode.
 
-# Méthode protégé.
-
-# Session
+# 1.Session
 Si vous voulez ajouter, modifier ou manipulez des variables de session dans votre méthode, suivez les étapes suivantes:
  - Ajouter un attribut nommé <strong>session</strong> de type HashMap<String, Object> dans votre classe
  - Décorer la méthode qui veut utiliser des variables de session avec <strong>@Session</strong>
  - Les variables de sessions seront tout de suite présentes dans l'attribut <strong>session</strong> de votre classe
  - De même, les modifications que vous apporterez dans l'attribut session de votre classe sera pris en compte dans la session de l'application.
 
+# 2.Session
+Le ModelView a aussi un attribut HashMap<String, Object> session qui contient les mêmes variables que le HttpSession de toute l'application. Donc si vous voulez utiliser, ajouter ou modifier des variables de session dans votre application, vous pouvez manipulez cet attribut
+
+# 3. Session: suppression
+Pour supprimer tous les variables de session, changer la valeur de l'attribut <strong>invalidateSession</strong> du ModelView à retourner en true avec son setter setInvalidateSession.
+Pour supprimer une variable spécifique, ajoutez son nom dans l'attribut <strong>removeSession</strong> qui est un tableau de String avec la méthode addRemoveSession(string)
 
