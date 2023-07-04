@@ -25,5 +25,13 @@
             </tr>
         <% } %>
     </table>
+    <div class="url">
+        <p>
+            <a href="/test-framework/emp-form.fwk">Ajouter employe</a>
+        </p>
+        <p>
+            <a href="/test-framework/logout.fwk">Se déconnecter</a>
+        </p>
+    </div>
 </body>
 </html>

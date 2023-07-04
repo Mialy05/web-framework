@@ -62,6 +62,14 @@ public class Table {
         return view;
     }
 
+    @Url(url = "table-clear.fwk")
+    public ModelView clear() {
+        ModelView view = new ModelView();
+        view.setView("liste-table");
+        view.addRemoveSession("article");
+        return view;
+    }
+
     public int getCount() {
         return count;
     }
