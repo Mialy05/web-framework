@@ -197,7 +197,9 @@ public class FrontServlet extends HttpServlet {
         // récupérer les sessions modifié dans la méthode annoté @Session pour mettre à jout httpSession  
             if(action.isAnnotationPresent(Session.class)) {
                 Field sessionField = instance.getClass().getDeclaredField("session");
+                sessionField.setAccessible(true);
                 HashMap<String, Object> classSession = ((HashMap<String, Object>)sessionField.get(instance));
+                sessionField.setAccessible(false);
                 
                 for (Map.Entry<String, Object> s : classSession.entrySet()) {
                     session.setAttribute(s.getKey() , s.getValue());
@@ -219,11 +221,22 @@ public class FrontServlet extends HttpServlet {
                     req.setAttribute(d.getKey(), d.getValue());
                 }
 
-                HashMap<String, Object> newSession = view.getSession();
-                if(newSession != null) {
+            // supprimer les variables de session 
+                if(view.getInvalidateSession() == true) {
+                    session.invalidate();
+                } else {
+                    HashMap<String, Object> newSession = view.getSession();
+
+                // supprimer les variables de session dans HTtpSession
+                    for (String attribute : view.getRemoveSession()) {
+                        session.removeAttribute(attribute);
+                    }    
+
+                // ajouter les sessions de modelView dans HttpSession
                     for (Map.Entry<String, Object> s : newSession.entrySet()) {
                         session.setAttribute(s.getKey() , s.getValue());
                     }
+                    
                 }
 
                 if(view.getJson() == false) {

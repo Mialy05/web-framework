@@ -27,19 +27,29 @@ public class Emp {
         setNom(nom);
     }
 
-    @Url(url = "connection.fwk") 
+    @Url(url = "login.fwk") 
     public ModelView connection() {
         ModelView view = new ModelView();
         view.setView("hello");
+        view.addItem("profil", "utilisateur normal");
         view.addSession("profil", "");
         return view;
     }
 
-    @Url(url = "connection-admin.fwk") 
+    @Url(url = "login-admin.fwk") 
     public ModelView connectionAdmin() {
         ModelView view = new ModelView();
         view.setView("hello");
+        view.addItem("profil", "admin");
         view.addSession("profil", "admin");
+        return view;
+    }
+
+    @Url(url = "logout.fwk") 
+    public ModelView logOut() {
+        ModelView view = new ModelView();
+        view.addRemoveSession("profil");
+        view.setView("home");
         return view;
     }
 
@@ -71,8 +81,7 @@ public class Emp {
     @Url(url = "emp-hello.fwk")
     public ModelView getListe() {
         ModelView view = new ModelView();
-        view.setJson(true);
-        view.setView("welcome");
+        view.setView("liste-emp");
         Vector<Emp> emps = new Vector<Emp>(2);
         emps.add(new Emp(1, "Nante"));
         emps.add(new Emp(2, "Mialisoa"));
@@ -80,6 +89,20 @@ public class Emp {
         return view;
     }
 
+    // JSON1
+    @Url(url = "liste.fwk")
+    public ModelView getListeEmp() {
+        ModelView view = new ModelView();
+        view.setJson(true);
+        view.setView("liste-emp");
+        Vector<Emp> emps = new Vector<Emp>(2);
+        emps.add(new Emp(1, "Nante"));
+        emps.add(new Emp(2, "Mialisoa"));
+        view.addItem("employes", emps);
+        return view;
+    }
+
+    // JSON2
     @Url(url = "emp-list.fwk")
     @Json
     public Vector<Emp> getAll() {
@@ -90,7 +113,7 @@ public class Emp {
     }
     
     @Url(url = "emp-form.fwk")
-    @Auth(profil = "")
+    @Auth(profil = "admin")
     public ModelView setForm() {
         ModelView view = new ModelView();
         view.setView("add-emp");
