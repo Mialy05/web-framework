@@ -9,10 +9,10 @@
 <body>
     <div class="url">
         <p>
-            <a href="/test-framework/login.fwk">Se connecter</a>
+            <a href="/test-framework2/login.fwk">Se connecter</a>
         </p>
         <p>
-            <a href="/test-framework/login-admin.fwk">Admin</a>
+            <a href="/test-framework2/login-admin.fwk">Admin</a>
         </p>
     </div>
 </body>

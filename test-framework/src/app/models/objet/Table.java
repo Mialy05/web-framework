@@ -9,16 +9,45 @@ import etu1834.framework.view.ModelView;
 
 public class Table {
     int count; 
+    String nom; 
+    int nombre; 
     HashMap<String, Object> session; 
 
     public Table() {
         this.session = new HashMap<String, Object>();
     }
 
+    @Url(url = "add-article.fwk")
+    public ModelView addArticle() {
+        ModelView view = new ModelView();
+        view.addSession(this.nom, this.nombre);
+        view.addItem("name", this.nom);
+        view.addItem("value", this.nombre);
+        view.setView("session-add");
+        return view;
+    }
+    
+    @Url(url = "session.fwk")
+    @Session()
+    public ModelView getAllSession() {
+        ModelView view = new ModelView();
+        view.addItem("session", this.getSession());
+        view.setView("session");
+        return view;
+    }
+
+    @Url(url = "clear-session.fwk") 
+    public ModelView clearSession() {
+        ModelView view = new ModelView();
+        view.setInvalidateSession(true);
+        view.setView("session-vide");
+        return view;
+    }
+
     @Url(url = "table-show.fwk")
     public ModelView show() {
         ModelView view = new ModelView();
-        view.setView("table");
+        view.setView("table.jsp");
         return view;
     }
 
@@ -39,18 +68,18 @@ public class Table {
         return view;
     }
 
-    @Session
-    @Url(url = "table-session.fwk")
-    public ModelView ajouter(@Param(name = "name") String name) {
-        ModelView view = new ModelView();
+    // @Session
+    // @Url(url = "table-session.fwk")
+    // public ModelView ajouter(@Param(name = "name") String name) {
+    //     ModelView view = new ModelView();
 
-        this.session.put("article", name);
+    //     this.session.put("article", name);
 
-        view.setView("session");
-        view.addItem("name", "article");
-        view.addItem("value", name);
-        return view;
-    }
+    //     view.setView("session");
+    //     view.addItem("name", "article");
+    //     view.addItem("value", name);
+    //     return view;
+    // }
 
     @Session
     @Url(url = "table-liste.fwk")
@@ -84,5 +113,25 @@ public class Table {
 
     public void setSession(HashMap<String, Object> session) {
         this.session = session;
+    }
+
+
+    public String getNom() {
+        return nom;
+    }
+
+
+    public void setNom(String nom) {
+        this.nom = nom;
+    }
+
+
+    public int getNombre() {
+        return nombre;
+    }
+
+
+    public void setNombre(int nombre) {
+        this.nombre = nombre;
     }
 }

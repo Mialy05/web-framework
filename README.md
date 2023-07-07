@@ -230,7 +230,7 @@ Si vous voulez ajouter, modifier ou manipulez des variables de session dans votr
  - De même, les modifications que vous apporterez dans l'attribut session de votre classe sera pris en compte dans la session de l'application.
 
 # 2.Session
-Le ModelView a aussi un attribut HashMap<String, Object> session qui contient les mêmes variables que le HttpSession de toute l'application. Donc si vous voulez utiliser, ajouter ou modifier des variables de session dans votre application, vous pouvez manipulez cet attribut
+Le ModelView a aussi un attribut HashMap<String, Object> session pour ajouter ou modifier les variables de session dans HttpSession de toute l'application. Donc si vous voulez utiliser, ajouter ou modifier des variables de session dans votre application, vous pouvez manipulez cet attribut. Mais si vous voulez récupérer des variables de session, optez  pour l'option précédente.
 
 # 3. Session: suppression
 Pour supprimer tous les variables de session, changer la valeur de l'attribut <strong>invalidateSession</strong> du ModelView à retourner en true avec son setter setInvalidateSession.
