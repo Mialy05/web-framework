@@ -7,7 +7,7 @@
     <title>Ajout employé</title>
 </head>
 <body>
-    <form action="/test-framework/emp-new.fwk" method="post" enctype="multipart/form-data" >
+    <form action="/test-framework2/emp-new.fwk" method="post" enctype="multipart/form-data" >
         <input type="text" name="nom" placeholder="nom">
         <input type="text" name="adresse" placeholder="adresse">
         <label for="naissance">Date de naissance</label>

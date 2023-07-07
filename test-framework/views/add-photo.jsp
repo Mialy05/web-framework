@@ -7,7 +7,7 @@
     <title>Ajout employé</title>
 </head>
 <body>
-    <form action="/test-framework/add-photo.fwk" method="post" enctype="multipart/form-data" >
+    <form action="/test-framework2/add-photo.fwk" method="post" enctype="multipart/form-data" >
         <input type="file" name="photo">
         <input type="submit" value="Valider">
     </form>

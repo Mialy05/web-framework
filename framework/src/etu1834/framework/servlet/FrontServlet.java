@@ -69,7 +69,6 @@ public class FrontServlet extends HttpServlet {
             }
             else {
                 String profil = authState.profil();   
-            
                 if(session.getAttribute(getInitParameter("sessionName")) != null) {
                     if(profil.equals("")) {
                         permission = true;
@@ -162,10 +161,11 @@ public class FrontServlet extends HttpServlet {
             }
 
             Object actionReturn;
+            // récupérer les paramètres de la méthode, nécessaire pour le cast des variables from view
             Parameter[] actionParams = action.getParameters();
             String parameterName;
+
         //fonction avec arguments
-        // out.println("param " + req.getParameter("name"));
             if(actionParams.length > 0) {
                 Object[] actionParamValue = new Object[actionParams.length];
                 for (int i = 0; i < actionParams.length; i++) {

@@ -27,10 +27,19 @@
     </table>
     <div class="url">
         <p>
-            <a href="/test-framework/emp-form.fwk">Ajouter employe</a>
+            <a href="/test-framework2/emp-list.fwk">Json( annoté )</a>
         </p>
         <p>
-            <a href="/test-framework/logout.fwk">Se déconnecter</a>
+            <a href="/test-framework2/liste.fwk">Json( modelView )</a>
+        </p>
+        <p>
+            <a href="/test-framework2/emp-form.fwk">Ajouter employe</a>
+        </p>
+        <p>
+            <a href="/test-framework2/session.fwk">Session</a>
+        </p>
+        <p>
+            <a href="/test-framework2/logout.fwk">Se déconnecter</a>
         </p>
     </div>
 </body>

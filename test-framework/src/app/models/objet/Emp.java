@@ -53,6 +53,7 @@ public class Emp {
         return view;
     }
 
+
     @Url(url = "emp-count.fwk")
     public ModelView count() {
         ModelView view = new ModelView();
@@ -79,6 +80,7 @@ public class Emp {
     }
     
     @Url(url = "emp-hello.fwk")
+    @Auth(profil = "")
     public ModelView getListe() {
         ModelView view = new ModelView();
         view.setView("liste-emp");
